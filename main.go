@@ -22,9 +22,11 @@ func main() {
 	}))
 	r.LoadHTMLGlob("resources/templates/*.html")
 	r.Static("/assets", "./resources/assets")
+
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
+
 	r.GET("/api/new", func(c *gin.Context) {
 		costStr := c.DefaultQuery("cost", "10")
 		cost, err := strconv.Atoi(costStr)
@@ -38,6 +40,15 @@ func main() {
 			return
 		}
 		c.JSON(200, gin.H{"hashed": string(h)})
+	})
+
+	r.GET("/api/judge", func(c *gin.Context) {
+		hashed := c.Query("text")
+		if err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte("河野太郎")); err != nil {
+			c.JSON(200, gin.H{"judge": false})
+		} else {
+			c.JSON(200, gin.H{"judge": true})
+		}
 	})
 	if err := r.Run(); err != nil {
 		log.Fatal(err)
